@@ -1,6 +1,7 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 import { ajax } from 'jquery';
+import Map from './Map.js'
 import { Router, Route, browserHistory, Link } from 'react-router';
 
 
@@ -9,7 +10,8 @@ export default class HappyHour extends React.Component {
 	constructor() {
 		super();
 		this.state = {
-			barsArray: []
+			barsArray: [],
+			apiKey: 'AIzaSyB5vnjckpsv4k5pj7qaeGeVlr3D91i-eaQ'
 		}
 		this.handleChange = this.handleChange.bind(this);
 		this.submitForm = this.submitForm.bind(this);
@@ -51,6 +53,10 @@ export default class HappyHour extends React.Component {
 		})
 	}
 	render() {
+		const locationCenter = {
+			lat: '49.260035',
+			lng: '-123.101093'
+		}
 		return (
 			<div>
 				<form onChange={this.handleChange} onSubmit={this.submitForm}>
@@ -67,11 +73,18 @@ export default class HappyHour extends React.Component {
 				</form>
 				<h4>Componented</h4>
 				{ this.state.barsArray.map((bar) => {
-					return (<div> 
+					return (<div className='Bars'> 
 								<p>{bar.venue.name}</p>
 							</div>
 					)
 				}) }
+				<div style={{height:'500px', width:'500px'}}>
+					<Map 
+						containerElement={<div style={{height:100+'%'}} />}
+						mapElement={<div style={{height:100+'%'}} />} 
+					/>
+					
+				</div>
 			</div>
 			)
 	}
