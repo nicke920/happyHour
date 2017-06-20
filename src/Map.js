@@ -1,8 +1,11 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
+import {Gmaps, Marker, InfoWindow, Circle} from 'react-gmaps';
 import HappyHour from './HappyHour.js';
-import { Router, Route, browserHistory, Link } from 'react-router';
-import { withGoogleMap, GoogleMap, Marker } from "react-google-maps";
+import { ajax } from 'jquery';
+// import { Router, Route, browserHistory, Link } from 'react-router';
+// import { withGoogleMap, GoogleMap, Marker } from "react-google-maps";
+
 // import _ from "lodash";
 // import Helmet from "react-helmet";
 // import GoogleMap from "react-google-map"
@@ -10,26 +13,114 @@ import { withGoogleMap, GoogleMap, Marker } from "react-google-maps";
 
 // const apiKey = 'AIzaSyBVzn1qT7LjhZ5m_frrbDT1lNZhNCsN0Jw'
 
+// const coords = {
+//   lat: 51.5258541,
+//   lng: -0.08040660000006028
+// };
+
+const params = {v: '3.exp', key: 'AIzaSyBVzn1qT7LjhZ5m_frrbDT1lNZhNCsN0Jw'};
+
+export default class Map extends React.Component {
+  constructor() {
+    super();
+    this.state = {
+      click: false,
+      activeBarID: ''
+    }
+    
+    this.click = this.click.bind(this);
+    this.click2 = this.click2.bind(this);
+  }
+  click(barID) {
+    this.setState({
+      activeBarID: barID
+    })
+    console.log('constructor', this.state.activeBarID)
+  }
+  click2(id) {
+    console.log('98as')
+  }
+
+  onMapCreated(map) {
+    map.setOptions({
+      disableDefaultUI: true
+    });
+  }
+
+  onDragEnd(e) {
+    console.log('onDragEnd', e);
+  }
+
+  onCloseClick() {
+    console.log('onCloseClick');
+  }
+
+  onClick(e) {
+    console.log('onClick', e);
+  }
+
+  render() {
+
+    let coordsList = [];
+    let coords = this.props.bars;
+    
+    if (coordsList !== undefined && coords !== undefined) {
+      console.log('try', coords)
+      coordsList = coords.map((coord) => {
+        return (
+            <Marker
+              lat={coord.venue.location.lat}
+              lng={coord.venue.location.lng}
+              draggable={true}
+              onClick={() => this.click2(coord.venue.id)}
+              onDragEnd={this.onDragEnd} />
+          )
+      })
+    }
 
 
-class Map extends React.Component {
-	render() {
-		const markers = this.props.markers || []
-		return (
-			<GoogleMap
-			className="nick"
-				defaultZoon={3}
-				defaultCenter={{lat: -25.363882, lng: 131.044832}}>
-				{markers.map((marker, index) => (
-					<Marker {...marker} />
-					)
-				)} 
+    return (
+      <div>
+        <Gmaps
+          width={'800px'}
+          height={'600px'}
+          lat={49.283468}
+          lng={-123.119705}
+          zoom={15}
+          loadingMessage={'Be happy'}
+          params={params}
+          onMapCreated={this.onMapCreated}>
+          {coordsList}
+        </Gmaps>
+        <button onClick={this.click}>Click here</button>
+      </div>
+      
+    )
+  }
+
+};
+
+
+
+
+// class Map extends React.Component {
+// 	render() {
+// 		const markers = this.props.markers || []
+// 		return (
+// 			<GoogleMap
+// 			className="nick"
+// 				defaultZoon={3}
+// 				defaultCenter={{lat: -25.363882, lng: 131.044832}}>
+// 				{markers.map((marker, index) => (
+// 					<Marker {...marker} />
+// 					)
+// 				)} 
 				
-			</GoogleMap>
-		)
-	}
-}
-export default withGoogleMap(Map)
+// 			</GoogleMap>
+// 		)
+// 	}
+// }
+// export default withGoogleMap(Map)
 
 // const Map = ({googleMaps}) => (
 // 	<div className="map">

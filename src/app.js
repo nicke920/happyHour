@@ -1,15 +1,13 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 import HappyHour from './HappyHour.js';
+import BarDetails from './BarDetails.js';
 import { Router, Route, browserHistory, Link } from 'react-router';
 
 class App extends React.Component {
 	render() {
 		return (
 			<div>
-				<h1>Nigga we made it</h1>
-				<p>nigga</p>
-				<Link to="/cuz">Go here</Link>
 				{ this.props.children }
 			</div>
 			)
@@ -17,7 +15,8 @@ class App extends React.Component {
 }
 
 ReactDOM.render(<Router history={browserHistory}>
-		<Route path="/" component={HappyHour}>
-			<Route path="/" component={App}/>
+		<Route path="/" component={App}>
+			<Route path="/venues" component={HappyHour}/>
+			<Route path="/venues/:venue_id" component={BarDetails} />
 		</Route>
 	</Router>, document.getElementById('app'))

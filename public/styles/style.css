@@ -1,6 +1,37 @@
-.map {
-  height: 300px; }
+.form {
+  width: 100%;
+  height: 90px;
+  background: teal;
+  border-bottom: 1px solid grey; }
 
-@media screen and (min-width: 1024px) {
-  .map {
-    height: 500px; } }
+.container {
+  display: flex;
+  flex-direction: column; }
+
+.body {
+  display: flex; }
+
+.results {
+  width: 50%;
+  max-height: 100vh;
+  overflow: scroll; }
+
+.map {
+  width: 50%; }
+
+.tile {
+  height: auto;
+  max-width: 500px;
+  margin-bottom: 10px;
+  display: flex;
+  box-shadow: 0 0 5px 1px grey; }
+  .tile .barPhoto {
+    display: flex;
+    align-self: flex-start;
+    width: 200px;
+    height: 200px; }
+    .tile .barPhoto img {
+      width: 100%; }
+
+.hide {
+  display: none; }
