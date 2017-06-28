@@ -38,7 +38,7 @@ export default class Map extends React.Component {
     console.log('constructor', this.state.activeBarID)
   }
   click2(id) {
-    console.log('98as')
+    console.log('click worked')
   }
 
   onMapCreated(map) {
@@ -80,10 +80,10 @@ export default class Map extends React.Component {
 
 
     return (
-      <div>
+      <section className="resultMap">
         <Gmaps
-          width={'800px'}
-          height={'600px'}
+          width={'100%'}
+          height={'100%'}
           lat={49.283468}
           lng={-123.119705}
           zoom={15}
@@ -92,8 +92,7 @@ export default class Map extends React.Component {
           onMapCreated={this.onMapCreated}>
           {coordsList}
         </Gmaps>
-        <button onClick={this.click}>Click here</button>
-      </div>
+      </section>
       
     )
   }

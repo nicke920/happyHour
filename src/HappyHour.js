@@ -15,12 +15,14 @@ export default class HappyHour extends React.Component {
 			apiKey: 'AIzaSyB5vnjckpsv4k5pj7qaeGeVlr3D91i-eaQ',
 			sorted: false,
 			alphabetical: false,
+			ratingSort: false,
 			filterText: ''
 		}
 		this.handleChange = this.handleChange.bind(this);
 		this.submitForm = this.submitForm.bind(this);
 		this.order = this.order.bind(this);
 		this.alphabetical= this.alphabetical.bind(this);
+		this.ratingSort = this.ratingSort.bind(this);
 	}
 	order() {
 		if (this.state.sorted === false) {
@@ -95,14 +97,52 @@ export default class HappyHour extends React.Component {
 				alphabetical: false
 			})
 		}
+	}
+	ratingSort() {
+		if (this.state.ratingSort === false) {
+			function compare(a,b) {
+			  if (a.venue.rating > b.venue.rating)
+			    return -1;
+			  if (a.venue.rating < b.venue.rating)
+			    return 1;
+			  return 0;
+			}
+			const sortedNewArray = this.state.barsArray.sort(compare);
 
+			this.ratingSort1.classList.toggle('hide');
+			this.ratingSort2.classList.toggle('hide');
+			this.setState({
+				barsArray: sortedNewArray,
+				ratingSort: true
+			})
+		}
+
+		if (this.state.ratingSort === true) {
+			function compare(a,b) {
+			  if (a.venue.rating < b.venue.rating)
+			    return -1;
+			  if (a.venue.rating > b.venue.rating)
+			    return 1;
+			  return 0;
+			}
+			const sortedNewArray = this.state.barsArray.sort(compare);
+			
+			this.ratingSort1.classList.toggle('hide');
+			this.ratingSort2.classList.toggle('hide');
+			this.setState({
+				barsArray: sortedNewArray,
+				ratingSort: false
+			})
+		}
 	}
 	componentDidMount() {
 		console.log('working')
 	}
 	handleChange(event) {
 	   this.setState({
-	   	[event.target.name]: event.target.value
+	   	[event.target.name]: event.target.value,
+	   	city: event.target.id
+
 	   });
 	 }
 	submitForm(e) {	
@@ -114,7 +154,7 @@ export default class HappyHour extends React.Component {
 			dataType: 'json',
 			data: {
 				ll: barArea,
-				radius: 1000,
+				radius: 500,
 				client_id: '3BUKQ0PLD3SPNW4KRDRH05W3PHE3M23EA1YSOBKJEQUQG4C0',
 				client_secret: 'QTAIFHU51DLAHY4U3VLUAA5CVIVGNLPJOJVSOCCYMGOEWP4T',
 				v: "20170304",
@@ -150,14 +190,28 @@ export default class HappyHour extends React.Component {
 					return (<div className="tile single"> 
 								<div className="barPhoto">
 									<img src={`${bar.venue.featuredPhotos.items[0].prefix}600x600${bar.venue.featuredPhotos.items[0].suffix}`}/>
+									<div className="side">
+										<div>
+											<p className='barRating'>{bar.venue.rating}</p>
+										</div>
+										<div>
+											<img src="../images/icons/wallet.png" alt=""/>
+											<p>{bar.venue.price.currency}</p>
+										</div>
+										<div>
+											<img src="../images/icons/walk.png" alt=""/>
+											<p className='distanceValue'>{`${(bar.venue.location.distance / 100).toFixed(1)}km`}</p>
+										</div>
+									</div>
 								</div>
 								<div className="barInfo">
-									<h3>{bar.venue.name}</h3>
-									<p>{bar.venue.rating}</p>
-									<p>{bar.venue.location.address}</p>
-									<p>{`${bar.venue.location.distance}m`}</p>
-									<p>{`${bar.venue.location.city}, ${bar.venue.location.state}`}</p>
-									<Link to={`/venues/${bar.venue.id}`}>Click dawg</Link>
+										<h5>{bar.venue.name}</h5>
+									<div className="main">
+										<p>{bar.venue.location.address}</p>
+									</div>
+									<div className="secondary">
+										<Link to={`/venues/${bar.venue.id}`}>Click dawg</Link>
+									</div>
 								</div>
 							</div>
 					)
@@ -187,33 +241,77 @@ export default class HappyHour extends React.Component {
 
 		return (
 			<div className="container">
-				<section className="form">
-					<form onChange={this.handleChange} onSubmit={this.submitForm}>
-						<label htmlFor="Downtown">Downtown:</label>
-						<input type="radio" name="location" id="Downtown" value="49.28145,-123.121"/>
-						<label htmlFor="Kits">Kits:</label>
-						<input type="radio" name="location" id="Kits" value="49.2726,-123.159"/>
-						<label htmlFor="Gastown">Gastown:</label>
-						<input type="radio" name="location" id="Gastown" value="49.282714, -123.106157"/>
-						<label htmlFor="Main">Main St:</label>
-						<input type="radio" name="location" id="Main" value="49.260035, -123.101093"/>
-						<input type="submit"/>
-					</form>
-				</section>
-				<section className="body">
-					<section className="results">
-						<h4>Restaurants</h4>
-						<input onChange={this.handleChange} type="text" name="filterText"/>
-						<button className='orderclose' onClick={this.order} ref={ref => this.sortButton = ref}>Sorted: Longest</button>
-						<button className='orderlong hide' onClick={this.order} ref={ref => this.sortButton1 = ref}>Sorted: Closest</button>
+				<section className="site-hero">
+						<nav>
+							<div className="wrapper">
+								<div className="logo">
+									<h2>happyHour</h2>
+								</div>
+								<ul>
+									<li>Home</li>
+									<li>About Us</li>
+									<li>Blog</li>
+									<li>Contact</li>
+								</ul>
+							</div>
+						</nav>
+						<div className="header-content">
+							<div className="wrapper">
+								<h1>Find Your Happy Hour</h1>
+								<p>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Possimus quaerat quos ab, maxime dignissimos culpa!</p>
+									<form onChange={this.handleChange} onSubmit={this.submitForm} className="form">
+											<div className="inputs">
+												<p>Neighbourhoods</p>
+												<div className='cityInput'>
+													<label htmlFor="Downtown">Downtown</label>
+													<input type="radio" name="location" id="Downtown" value="49.28145,-123.121" />
+												</div>
 
-						<button onClick={this.alphabetical} ref={ref => this.alphabetical1 = ref}>Alphabetically: A-Z</button>
-						<button className='hide' onClick={this.alphabetical} ref={ref => this.alphabetical2 = ref}>Alphabetically: Z-A</button>
-						{barList}
+												<div className='cityInput'>
+													<label htmlFor="Kits">Kits</label>
+													<input type="radio" name="location" id="Kits" value="49.2726,-123.159" />
+												</div>
+
+												<div className='cityInput'>
+													<label htmlFor="Main">Main St</label>
+													<input type="radio" name="location" id="Main" value="49.260035, -123.101093" />
+												</div>
+
+												<div className='cityInput'>
+													<label htmlFor="Gastown">Gastown</label>
+													<input type="radio" name="location" id="Gastown" value="49.282714, -123.106157" />
+												</div>
+											</div>
+										<input type="submit" id="formSubmit"/>
+									</form>
+							</div>
+						</div>
+				</section>
+				
+				<section className="body">
+				<Map bars={this.state.barsArray}/>
+					<div className="filters">
+						<div className="wrapper">
+							<input onChange={this.handleChange} type="text" name="filterText" placeholder='search...'/>
+							<button className='orderclose' onClick={this.order} ref={ref => this.sortButton = ref}>Sorted: Longest</button>
+							<button className='orderlong hide' onClick={this.order} ref={ref => this.sortButton1 = ref}>Sorted: Closest</button>
+
+							<button onClick={this.alphabetical} ref={ref => this.alphabetical1 = ref}>Alphabetically: A-Z</button>
+							<button className='hide' onClick={this.alphabetical} ref={ref => this.alphabetical2 = ref}>Alphabetically: Z-A</button>
+
+							<button onClick={this.ratingSort} ref={ref => this.ratingSort1 = ref}>Sorted: Highest to Lowest</button>
+							<button onClick={this.ratingSort} className='hide' ref={ref => this.ratingSort2 = ref}>Sorted: Lowest to Highest</button>
+						</div>
+					</div>
+
+					
+
+					<section className="results">
+						<div className="wrapper">
+							{barList}
+						</div>
 					</section>
-					<section className="map">
-						<Map bars={this.state.barsArray}/>
-					</section>
+					
 				</section>
 			</div>
 			)

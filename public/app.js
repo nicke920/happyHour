@@ -54083,13 +54083,27 @@ var BarDetails = function (_React$Component) {
 				'div',
 				{ className: 'container' },
 				_react2.default.createElement(
+					'div',
+					{ className: 'flickity' },
+					_react2.default.createElement(
+						'h4',
+						null,
+						'Flickity Goes here'
+					)
+				),
+				_react2.default.createElement(
+					'div',
+					{ className: 'main' },
+					_react2.default.createElement('div', { className: 'wrapper' })
+				),
+				_react2.default.createElement(
 					'section',
 					{ className: 'body' },
 					_react2.default.createElement(
 						'section',
 						{ className: 'results' },
 						_react2.default.createElement(
-							'h2',
+							'h1',
 							null,
 							this.state.bar.name
 						),
@@ -54168,12 +54182,14 @@ var HappyHour = function (_React$Component) {
 			apiKey: 'AIzaSyB5vnjckpsv4k5pj7qaeGeVlr3D91i-eaQ',
 			sorted: false,
 			alphabetical: false,
+			ratingSort: false,
 			filterText: ''
 		};
 		_this.handleChange = _this.handleChange.bind(_this);
 		_this.submitForm = _this.submitForm.bind(_this);
 		_this.order = _this.order.bind(_this);
 		_this.alphabetical = _this.alphabetical.bind(_this);
+		_this.ratingSort = _this.ratingSort.bind(_this);
 		return _this;
 	}
 
@@ -54251,6 +54267,43 @@ var HappyHour = function (_React$Component) {
 			}
 		}
 	}, {
+		key: 'ratingSort',
+		value: function ratingSort() {
+			if (this.state.ratingSort === false) {
+				var compare = function compare(a, b) {
+					if (a.venue.rating > b.venue.rating) return -1;
+					if (a.venue.rating < b.venue.rating) return 1;
+					return 0;
+				};
+
+				var sortedNewArray = this.state.barsArray.sort(compare);
+
+				this.ratingSort1.classList.toggle('hide');
+				this.ratingSort2.classList.toggle('hide');
+				this.setState({
+					barsArray: sortedNewArray,
+					ratingSort: true
+				});
+			}
+
+			if (this.state.ratingSort === true) {
+				var _compare3 = function _compare3(a, b) {
+					if (a.venue.rating < b.venue.rating) return -1;
+					if (a.venue.rating > b.venue.rating) return 1;
+					return 0;
+				};
+
+				var _sortedNewArray = this.state.barsArray.sort(_compare3);
+
+				this.ratingSort1.classList.toggle('hide');
+				this.ratingSort2.classList.toggle('hide');
+				this.setState({
+					barsArray: _sortedNewArray,
+					ratingSort: false
+				});
+			}
+		}
+	}, {
 		key: 'componentDidMount',
 		value: function componentDidMount() {
 			console.log('working');
@@ -54258,7 +54311,9 @@ var HappyHour = function (_React$Component) {
 	}, {
 		key: 'handleChange',
 		value: function handleChange(event) {
-			this.setState(_defineProperty({}, event.target.name, event.target.value));
+			var _setState;
+
+			this.setState((_setState = {}, _defineProperty(_setState, event.target.name, event.target.value), _defineProperty(_setState, 'city', event.target.id), _setState));
 		}
 	}, {
 		key: 'submitForm',
@@ -54273,7 +54328,7 @@ var HappyHour = function (_React$Component) {
 				dataType: 'json',
 				data: {
 					ll: barArea,
-					radius: 1000,
+					radius: 500,
 					client_id: '3BUKQ0PLD3SPNW4KRDRH05W3PHE3M23EA1YSOBKJEQUQG4C0',
 					client_secret: 'QTAIFHU51DLAHY4U3VLUAA5CVIVGNLPJOJVSOCCYMGOEWP4T',
 					v: "20170304",
@@ -54313,40 +54368,66 @@ var HappyHour = function (_React$Component) {
 						_react2.default.createElement(
 							'div',
 							{ className: 'barPhoto' },
-							_react2.default.createElement('img', { src: bar.venue.featuredPhotos.items[0].prefix + '600x600' + bar.venue.featuredPhotos.items[0].suffix })
+							_react2.default.createElement('img', { src: bar.venue.featuredPhotos.items[0].prefix + '600x600' + bar.venue.featuredPhotos.items[0].suffix }),
+							_react2.default.createElement(
+								'div',
+								{ className: 'side' },
+								_react2.default.createElement(
+									'div',
+									null,
+									_react2.default.createElement(
+										'p',
+										{ className: 'barRating' },
+										bar.venue.rating
+									)
+								),
+								_react2.default.createElement(
+									'div',
+									null,
+									_react2.default.createElement('img', { src: '../images/icons/wallet.png', alt: '' }),
+									_react2.default.createElement(
+										'p',
+										null,
+										bar.venue.price.currency
+									)
+								),
+								_react2.default.createElement(
+									'div',
+									null,
+									_react2.default.createElement('img', { src: '../images/icons/walk.png', alt: '' }),
+									_react2.default.createElement(
+										'p',
+										{ className: 'distanceValue' },
+										(bar.venue.location.distance / 100).toFixed(1) + 'km'
+									)
+								)
+							)
 						),
 						_react2.default.createElement(
 							'div',
 							{ className: 'barInfo' },
 							_react2.default.createElement(
-								'h3',
+								'h5',
 								null,
 								bar.venue.name
 							),
 							_react2.default.createElement(
-								'p',
-								null,
-								bar.venue.rating
+								'div',
+								{ className: 'main' },
+								_react2.default.createElement(
+									'p',
+									null,
+									bar.venue.location.address
+								)
 							),
 							_react2.default.createElement(
-								'p',
-								null,
-								bar.venue.location.address
-							),
-							_react2.default.createElement(
-								'p',
-								null,
-								bar.venue.location.distance + 'm'
-							),
-							_react2.default.createElement(
-								'p',
-								null,
-								bar.venue.location.city + ', ' + bar.venue.location.state
-							),
-							_react2.default.createElement(
-								_reactRouter.Link,
-								{ to: '/venues/' + bar.venue.id },
-								'Click dawg'
+								'div',
+								{ className: 'secondary' },
+								_react2.default.createElement(
+									_reactRouter.Link,
+									{ to: '/venues/' + bar.venue.id },
+									'Click dawg'
+								)
 							)
 						)
 					);
@@ -54406,83 +54487,184 @@ var HappyHour = function (_React$Component) {
 				{ className: 'container' },
 				_react2.default.createElement(
 					'section',
-					{ className: 'form' },
+					{ className: 'site-hero' },
 					_react2.default.createElement(
-						'form',
-						{ onChange: this.handleChange, onSubmit: this.submitForm },
+						'nav',
+						null,
 						_react2.default.createElement(
-							'label',
-							{ htmlFor: 'Downtown' },
-							'Downtown:'
-						),
-						_react2.default.createElement('input', { type: 'radio', name: 'location', id: 'Downtown', value: '49.28145,-123.121' }),
+							'div',
+							{ className: 'wrapper' },
+							_react2.default.createElement(
+								'div',
+								{ className: 'logo' },
+								_react2.default.createElement(
+									'h2',
+									null,
+									'happyHour'
+								)
+							),
+							_react2.default.createElement(
+								'ul',
+								null,
+								_react2.default.createElement(
+									'li',
+									null,
+									'Home'
+								),
+								_react2.default.createElement(
+									'li',
+									null,
+									'About Us'
+								),
+								_react2.default.createElement(
+									'li',
+									null,
+									'Blog'
+								),
+								_react2.default.createElement(
+									'li',
+									null,
+									'Contact'
+								)
+							)
+						)
+					),
+					_react2.default.createElement(
+						'div',
+						{ className: 'header-content' },
 						_react2.default.createElement(
-							'label',
-							{ htmlFor: 'Kits' },
-							'Kits:'
-						),
-						_react2.default.createElement('input', { type: 'radio', name: 'location', id: 'Kits', value: '49.2726,-123.159' }),
-						_react2.default.createElement(
-							'label',
-							{ htmlFor: 'Gastown' },
-							'Gastown:'
-						),
-						_react2.default.createElement('input', { type: 'radio', name: 'location', id: 'Gastown', value: '49.282714, -123.106157' }),
-						_react2.default.createElement(
-							'label',
-							{ htmlFor: 'Main' },
-							'Main St:'
-						),
-						_react2.default.createElement('input', { type: 'radio', name: 'location', id: 'Main', value: '49.260035, -123.101093' }),
-						_react2.default.createElement('input', { type: 'submit' })
+							'div',
+							{ className: 'wrapper' },
+							_react2.default.createElement(
+								'h1',
+								null,
+								'Find Your Happy Hour'
+							),
+							_react2.default.createElement(
+								'p',
+								null,
+								'Lorem ipsum dolor sit amet, consectetur adipisicing elit. Possimus quaerat quos ab, maxime dignissimos culpa!'
+							),
+							_react2.default.createElement(
+								'form',
+								{ onChange: this.handleChange, onSubmit: this.submitForm, className: 'form' },
+								_react2.default.createElement(
+									'div',
+									{ className: 'inputs' },
+									_react2.default.createElement(
+										'p',
+										null,
+										'Neighbourhoods'
+									),
+									_react2.default.createElement(
+										'div',
+										{ className: 'cityInput' },
+										_react2.default.createElement(
+											'label',
+											{ htmlFor: 'Downtown' },
+											'Downtown'
+										),
+										_react2.default.createElement('input', { type: 'radio', name: 'location', id: 'Downtown', value: '49.28145,-123.121' })
+									),
+									_react2.default.createElement(
+										'div',
+										{ className: 'cityInput' },
+										_react2.default.createElement(
+											'label',
+											{ htmlFor: 'Kits' },
+											'Kits'
+										),
+										_react2.default.createElement('input', { type: 'radio', name: 'location', id: 'Kits', value: '49.2726,-123.159' })
+									),
+									_react2.default.createElement(
+										'div',
+										{ className: 'cityInput' },
+										_react2.default.createElement(
+											'label',
+											{ htmlFor: 'Main' },
+											'Main St'
+										),
+										_react2.default.createElement('input', { type: 'radio', name: 'location', id: 'Main', value: '49.260035, -123.101093' })
+									),
+									_react2.default.createElement(
+										'div',
+										{ className: 'cityInput' },
+										_react2.default.createElement(
+											'label',
+											{ htmlFor: 'Gastown' },
+											'Gastown'
+										),
+										_react2.default.createElement('input', { type: 'radio', name: 'location', id: 'Gastown', value: '49.282714, -123.106157' })
+									)
+								),
+								_react2.default.createElement('input', { type: 'submit', id: 'formSubmit' })
+							)
+						)
 					)
 				),
 				_react2.default.createElement(
 					'section',
 					{ className: 'body' },
+					_react2.default.createElement(_Map2.default, { bars: this.state.barsArray }),
+					_react2.default.createElement(
+						'div',
+						{ className: 'filters' },
+						_react2.default.createElement(
+							'div',
+							{ className: 'wrapper' },
+							_react2.default.createElement('input', { onChange: this.handleChange, type: 'text', name: 'filterText', placeholder: 'search...' }),
+							_react2.default.createElement(
+								'button',
+								{ className: 'orderclose', onClick: this.order, ref: function ref(_ref) {
+										return _this3.sortButton = _ref;
+									} },
+								'Sorted: Longest'
+							),
+							_react2.default.createElement(
+								'button',
+								{ className: 'orderlong hide', onClick: this.order, ref: function ref(_ref2) {
+										return _this3.sortButton1 = _ref2;
+									} },
+								'Sorted: Closest'
+							),
+							_react2.default.createElement(
+								'button',
+								{ onClick: this.alphabetical, ref: function ref(_ref3) {
+										return _this3.alphabetical1 = _ref3;
+									} },
+								'Alphabetically: A-Z'
+							),
+							_react2.default.createElement(
+								'button',
+								{ className: 'hide', onClick: this.alphabetical, ref: function ref(_ref4) {
+										return _this3.alphabetical2 = _ref4;
+									} },
+								'Alphabetically: Z-A'
+							),
+							_react2.default.createElement(
+								'button',
+								{ onClick: this.ratingSort, ref: function ref(_ref5) {
+										return _this3.ratingSort1 = _ref5;
+									} },
+								'Sorted: Highest to Lowest'
+							),
+							_react2.default.createElement(
+								'button',
+								{ onClick: this.ratingSort, className: 'hide', ref: function ref(_ref6) {
+										return _this3.ratingSort2 = _ref6;
+									} },
+								'Sorted: Lowest to Highest'
+							)
+						)
+					),
 					_react2.default.createElement(
 						'section',
 						{ className: 'results' },
 						_react2.default.createElement(
-							'h4',
-							null,
-							'Restaurants'
-						),
-						_react2.default.createElement('input', { onChange: this.handleChange, type: 'text', name: 'filterText' }),
-						_react2.default.createElement(
-							'button',
-							{ className: 'orderclose', onClick: this.order, ref: function ref(_ref) {
-									return _this3.sortButton = _ref;
-								} },
-							'Sorted: Longest'
-						),
-						_react2.default.createElement(
-							'button',
-							{ className: 'orderlong hide', onClick: this.order, ref: function ref(_ref2) {
-									return _this3.sortButton1 = _ref2;
-								} },
-							'Sorted: Closest'
-						),
-						_react2.default.createElement(
-							'button',
-							{ onClick: this.alphabetical, ref: function ref(_ref3) {
-									return _this3.alphabetical1 = _ref3;
-								} },
-							'Alphabetically: A-Z'
-						),
-						_react2.default.createElement(
-							'button',
-							{ className: 'hide', onClick: this.alphabetical, ref: function ref(_ref4) {
-									return _this3.alphabetical2 = _ref4;
-								} },
-							'Alphabetically: Z-A'
-						),
-						barList
-					),
-					_react2.default.createElement(
-						'section',
-						{ className: 'map' },
-						_react2.default.createElement(_Map2.default, { bars: this.state.barsArray })
+							'div',
+							{ className: 'wrapper' },
+							barList
+						)
 					)
 				)
 			);
@@ -54573,7 +54755,7 @@ var Map = function (_React$Component) {
   }, {
     key: 'click2',
     value: function click2(id) {
-      console.log('98as');
+      console.log('click worked');
     }
   }, {
     key: 'onMapCreated',
@@ -54620,13 +54802,13 @@ var Map = function (_React$Component) {
       }
 
       return _react2.default.createElement(
-        'div',
-        null,
+        'section',
+        { className: 'resultMap' },
         _react2.default.createElement(
           _reactGmaps.Gmaps,
           {
-            width: '800px',
-            height: '600px',
+            width: '100%',
+            height: '100%',
             lat: 49.283468,
             lng: -123.119705,
             zoom: 15,
@@ -54634,11 +54816,6 @@ var Map = function (_React$Component) {
             params: params,
             onMapCreated: this.onMapCreated },
           coordsList
-        ),
-        _react2.default.createElement(
-          'button',
-          { onClick: this.click },
-          'Click here'
         )
       );
     }

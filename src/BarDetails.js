@@ -7,6 +7,7 @@ import { Router, Route, browserHistory, Link } from 'react-router';
 
 
 
+
 export default class BarDetails extends React.Component {
 	constructor() {
 		super();
@@ -54,9 +55,16 @@ export default class BarDetails extends React.Component {
 	render() {
 		return (
 				<div className="container">
+					<div className="flickity">
+						<h4>Flickity Goes here</h4>
+					</div>
+					<div className="main">
+						<div className="wrapper">
+						</div>
+					</div>
 					<section className='body'>
 						<section className="results">
-							<h2>{this.state.bar.name}</h2>
+							<h1>{this.state.bar.name}</h1>
 							<p>{this.state.bar.url}</p>
 							<p>{this.state.bar.rating}</p>
 							{this.state.barPhotos.map((photo) => {

@@ -10,6 +10,7 @@ const reload = browserSync.reload;
 const notify = require('gulp-notify');
 const plumber = require('gulp-plumber');
 const historyApiFallback = require('connect-history-api-fallback');
+// const Flickity = require('react-flickity-component')(React);
 
 gulp.task('js', () => {
     browserify('src/app.js')
