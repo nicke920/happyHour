@@ -54132,7 +54132,94 @@ var BarDetails = function (_React$Component) {
 
 exports.default = BarDetails;
 
-},{"./HappyHour.js":261,"./Map.js":262,"jquery":45,"react":257,"react-dom":59,"react-router":225}],261:[function(require,module,exports){
+},{"./HappyHour.js":262,"./Map.js":263,"jquery":45,"react":257,"react-dom":59,"react-router":225}],261:[function(require,module,exports){
+'use strict';
+
+Object.defineProperty(exports, "__esModule", {
+	value: true
+});
+
+var _react = require('react');
+
+var _react2 = _interopRequireDefault(_react);
+
+var _reactDom = require('react-dom');
+
+var _reactDom2 = _interopRequireDefault(_reactDom);
+
+var _HappyHour = require('./HappyHour.js');
+
+var _HappyHour2 = _interopRequireDefault(_HappyHour);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+var BarPage = function BarPage(props) {
+	console.log(props);
+	return _react2.default.createElement(
+		'div',
+		{ className: 'container' },
+		_react2.default.createElement(
+			'div',
+			{ className: 'flickity' },
+			_react2.default.createElement(
+				'h4',
+				null,
+				'Flickity Goes here'
+			)
+		),
+		_react2.default.createElement(
+			'div',
+			{ className: 'main' },
+			_react2.default.createElement(
+				'div',
+				{ className: 'wrapper' },
+				_react2.default.createElement(
+					'button',
+					{ onClick: props.backBarToHome },
+					'Go Back'
+				),
+				_react2.default.createElement(
+					'button',
+					{ onClick: props.addToFavs },
+					'Add to Favourites'
+				)
+			)
+		),
+		_react2.default.createElement(
+			'section',
+			{ className: 'body' },
+			_react2.default.createElement(
+				'section',
+				{ className: 'results' },
+				_react2.default.createElement(
+					'h1',
+					null,
+					props.bar.name
+				),
+				_react2.default.createElement(
+					'p',
+					null,
+					props.bar.url
+				),
+				_react2.default.createElement(
+					'p',
+					null,
+					props.bar.rating
+				),
+				props.barPhotos.map(function (photo, i) {
+					if (i < 6) {
+						return _react2.default.createElement('img', { src: photo.prefix + '500x500' + photo.suffix, alt: '' });
+					}
+				})
+			),
+			_react2.default.createElement('section', { className: 'map' })
+		)
+	);
+};
+
+exports.default = BarPage;
+
+},{"./HappyHour.js":262,"react":257,"react-dom":59}],262:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -54154,6 +54241,10 @@ var _jquery = require('jquery');
 var _Map = require('./Map.js');
 
 var _Map2 = _interopRequireDefault(_Map);
+
+var _BarPage = require('./BarPage.js');
+
+var _BarPage2 = _interopRequireDefault(_BarPage);
 
 var _lodash = require('lodash');
 
@@ -54183,13 +54274,25 @@ var HappyHour = function (_React$Component) {
 			sorted: false,
 			alphabetical: false,
 			ratingSort: false,
-			filterText: ''
+			filterText: '',
+			location: '',
+			barPageOpen: false,
+			favsPageOpen: false,
+			selectedBar: {},
+			selectedBarID: '',
+			selectedBarPhotos: [],
+			userFavsArray: []
 		};
 		_this.handleChange = _this.handleChange.bind(_this);
 		_this.submitForm = _this.submitForm.bind(_this);
+		_this.submitFormTopNav = _this.submitFormTopNav.bind(_this);
 		_this.order = _this.order.bind(_this);
 		_this.alphabetical = _this.alphabetical.bind(_this);
 		_this.ratingSort = _this.ratingSort.bind(_this);
+		_this.selectBar = _this.selectBar.bind(_this);
+		_this.backBarToHome = _this.backBarToHome.bind(_this);
+		_this.addToFavs = _this.addToFavs.bind(_this);
+		_this.viewFavs = _this.viewFavs.bind(_this);
 		return _this;
 	}
 
@@ -54343,143 +54446,256 @@ var HappyHour = function (_React$Component) {
 			}).then(function (result) {
 				var barsData = result.response.groups[0].items;
 				_this2.setState({
-					barsArray: barsData
+					barsArray: barsData,
+					location: ''
 				});
-				console.log('new', _this2.state.barsArray);
 			});
+			this.homepageSearch.classList.toggle('hide');
+			this.searchedTopNav.classList.toggle('hide');
+		}
+	}, {
+		key: 'submitFormTopNav',
+		value: function submitFormTopNav(e) {
+			var _this3 = this;
+
+			e.preventDefault();
+			var barArea = this.state.location;
+			// console.log(this.state.location)
+			(0, _jquery.ajax)({
+				url: "https://api.foursquare.com/v2/venues/explore",
+				dataType: 'json',
+				data: {
+					ll: barArea,
+					radius: 500,
+					client_id: '3BUKQ0PLD3SPNW4KRDRH05W3PHE3M23EA1YSOBKJEQUQG4C0',
+					client_secret: 'QTAIFHU51DLAHY4U3VLUAA5CVIVGNLPJOJVSOCCYMGOEWP4T',
+					v: "20170304",
+					section: 'drinks, specials',
+					limit: 10000,
+					price: '1,2,3,4',
+					venuePhotos: 1,
+					time: 'any',
+					day: 'any'
+
+				}
+			}).then(function (result) {
+				var barsData = result.response.groups[0].items;
+				_this3.setState({
+					barsArray: barsData,
+					location: ''
+				});
+			});
+		}
+	}, {
+		key: 'selectBar',
+		value: function selectBar(bar) {
+			var _this4 = this;
+
+			(0, _jquery.ajax)({
+				url: 'https://api.foursquare.com/v2/venues/' + bar.venue.id + '/photos',
+				dataType: 'json',
+				data: {
+					oauth_token: 'CZFPQNSPUHEXWCREUHVGTO2KYUBZKS5KE2ZPVW0QQBS4HCFR',
+					v: '20170617',
+					limit: 200
+				}
+			}).then(function (result) {
+				console.log('new', result);
+				_this4.setState({
+					selectedBar: bar.venue,
+					selectedBarID: bar.venue.id,
+					selectedBarPhotos: result.response.photos.items,
+					barPageOpen: true
+				});
+			});
+			if (this.homepageSearchResults !== null) {
+				this.homepageSearchResults.classList.add('hide');
+			}
+			if (this.barPageResult !== null) {
+				this.barPageResult.classList.remove('hide');
+			}
+		}
+	}, {
+		key: 'backBarToHome',
+		value: function backBarToHome() {
+			if (this.homepageSearchResults !== null) {
+				this.homepageSearchResults.classList.remove('hide');
+			}
+			if (this.barPageResult !== null) {
+				this.barPageResult.classList.add('hide');
+			}
+
+			this.setState({
+				selectedBar: '',
+				selectedBarID: '',
+				selectedBarPhotos: [],
+				barPageOpen: false
+			});
+		}
+	}, {
+		key: 'addToFavs',
+		value: function addToFavs() {
+			var userFavs = this.state.userFavsArray;
+			userFavs.push(this.state.selectedBar);
+			this.setState({
+				userFavsArray: userFavs
+			});
+		}
+	}, {
+		key: 'viewFavs',
+		value: function viewFavs() {
+			this.setState({
+				favsPageOpen: true
+			});
+			if (this.homepageSearchResults !== null) {
+				this.homepageSearchResults.classList.add('hide');
+			}
+			if (this.barPageResult !== null) {
+				this.barPageResult.classList.add('hide');
+			}
 		}
 	}, {
 		key: 'render',
 		value: function render() {
-			var _this3 = this;
-
-			var locationCenter = {
-				lat: '49.260035',
-				lng: '-123.101093'
-			};
+			var _this5 = this;
 
 			var barList = [];
-
+			//once results come back, user can enter filter text to go through the bars
 			if (this.state.filterText.length === 0) {
 				barList = this.state.barsArray.map(function (bar, i) {
-					return _react2.default.createElement(
-						'div',
-						{ className: 'tile single' },
-						_react2.default.createElement(
+					if (bar.venue.featuredPhotos !== undefined) {
+						return _react2.default.createElement(
 							'div',
-							{ className: 'barPhoto' },
-							_react2.default.createElement('img', { src: bar.venue.featuredPhotos.items[0].prefix + '600x600' + bar.venue.featuredPhotos.items[0].suffix }),
+							{ className: 'tile single' },
 							_react2.default.createElement(
 								'div',
-								{ className: 'side' },
+								{ className: 'barPhoto' },
+								_react2.default.createElement('img', { src: bar.venue.featuredPhotos.items[0].prefix + '600x600' + bar.venue.featuredPhotos.items[0].suffix }),
 								_react2.default.createElement(
 									'div',
-									null,
+									{ className: 'side' },
 									_react2.default.createElement(
-										'p',
-										{ className: 'barRating' },
-										bar.venue.rating
-									)
-								),
-								_react2.default.createElement(
-									'div',
-									null,
-									_react2.default.createElement('img', { src: '../images/icons/wallet.png', alt: '' }),
-									_react2.default.createElement(
-										'p',
+										'div',
 										null,
-										bar.venue.price.currency
+										_react2.default.createElement(
+											'p',
+											{ className: 'barRating' },
+											bar.venue.rating
+										)
+									),
+									_react2.default.createElement(
+										'div',
+										null,
+										_react2.default.createElement('img', { src: '../images/icons/wallet.png', alt: '' }),
+										_react2.default.createElement(
+											'p',
+											null,
+											bar.venue.price.currency
+										)
+									),
+									_react2.default.createElement(
+										'div',
+										null,
+										_react2.default.createElement('img', { src: '../images/icons/walk.png', alt: '' }),
+										_react2.default.createElement(
+											'p',
+											{ className: 'distanceValue' },
+											(bar.venue.location.distance / 100).toFixed(1) + 'km'
+										)
 									)
+								)
+							),
+							_react2.default.createElement(
+								'div',
+								{ className: 'barInfo' },
+								_react2.default.createElement(
+									'h5',
+									null,
+									bar.venue.name
 								),
 								_react2.default.createElement(
-									'div',
-									null,
-									_react2.default.createElement('img', { src: '../images/icons/walk.png', alt: '' }),
-									_react2.default.createElement(
-										'p',
-										{ className: 'distanceValue' },
-										(bar.venue.location.distance / 100).toFixed(1) + 'km'
-									)
+									'button',
+									{ onClick: function onClick() {
+											return _this5.selectBar(bar);
+										} },
+									'Select'
 								)
 							)
-						),
-						_react2.default.createElement(
-							'div',
-							{ className: 'barInfo' },
-							_react2.default.createElement(
-								'h5',
-								null,
-								bar.venue.name
-							),
-							_react2.default.createElement(
-								'div',
-								{ className: 'main' },
-								_react2.default.createElement(
-									'p',
-									null,
-									bar.venue.location.address
-								)
-							),
-							_react2.default.createElement(
-								'div',
-								{ className: 'secondary' },
-								_react2.default.createElement(
-									_reactRouter.Link,
-									{ to: '/venues/' + bar.venue.id },
-									'Click dawg'
-								)
-							)
-						)
-					);
+						);
+					}
 				});
 			} else {
 				barList = this.state.barsArray.filter(function (bar) {
-					return bar.venue.name.toLowerCase().indexOf(_this3.state.filterText.toLowerCase()) >= 0;
+					return bar.venue.name.toLowerCase().indexOf(_this5.state.filterText.toLowerCase()) >= 0;
 				}).map(function (bar, i) {
-					return _react2.default.createElement(
-						'div',
-						{ className: 'tile single' },
-						_react2.default.createElement(
+					if (bar.venue.featuredPhotos !== undefined) {
+						return _react2.default.createElement(
 							'div',
-							{ className: 'barPhoto' },
-							_react2.default.createElement('img', { src: bar.venue.featuredPhotos.items[0].prefix + '600x600' + bar.venue.featuredPhotos.items[0].suffix })
-						),
-						_react2.default.createElement(
-							'div',
-							{ className: 'barInfo' },
+							{ className: 'tile single' },
 							_react2.default.createElement(
-								'h3',
-								null,
-								bar.venue.name
+								'div',
+								{ className: 'barPhoto' },
+								_react2.default.createElement('img', { src: bar.venue.featuredPhotos.items[0].prefix + '600x600' + bar.venue.featuredPhotos.items[0].suffix }),
+								_react2.default.createElement(
+									'div',
+									{ className: 'side' },
+									_react2.default.createElement(
+										'div',
+										null,
+										_react2.default.createElement(
+											'p',
+											{ className: 'barRating' },
+											bar.venue.rating
+										)
+									),
+									_react2.default.createElement(
+										'div',
+										null,
+										_react2.default.createElement('img', { src: '../images/icons/wallet.png', alt: '' }),
+										_react2.default.createElement(
+											'p',
+											null,
+											bar.venue.price.currency
+										)
+									),
+									_react2.default.createElement(
+										'div',
+										null,
+										_react2.default.createElement('img', { src: '../images/icons/walk.png', alt: '' }),
+										_react2.default.createElement(
+											'p',
+											{ className: 'distanceValue' },
+											(bar.venue.location.distance / 100).toFixed(1) + 'km'
+										)
+									)
+								)
 							),
 							_react2.default.createElement(
-								'p',
-								null,
-								bar.venue.rating
-							),
-							_react2.default.createElement(
-								'p',
-								null,
-								bar.venue.location.address
-							),
-							_react2.default.createElement(
-								'p',
-								null,
-								bar.venue.location.distance + 'm'
-							),
-							_react2.default.createElement(
-								'p',
-								null,
-								bar.venue.location.city + ', ' + bar.venue.location.state
-							),
-							_react2.default.createElement(
-								_reactRouter.Link,
-								{ to: '/venues/' + bar.venue.id },
-								'Click dawg'
+								'div',
+								{ className: 'barInfo' },
+								_react2.default.createElement(
+									'h5',
+									null,
+									bar.venue.name
+								),
+								_react2.default.createElement(
+									'button',
+									{ onClick: function onClick() {
+											return _this5.selectBar(bar);
+										} },
+									'Select'
+								)
 							)
-						)
-					);
+						);
+					}
 				});
+			}
+
+			var favsBarList = [];
+			if (this.state.favsPageOpen === true && this.state.userFavsArray.length > 0) {
+				console.log('999', this.state.barsArray.map(function (bar) {
+					bar.name;
+				}));
 			}
 
 			return _react2.default.createElement(
@@ -54487,7 +54703,9 @@ var HappyHour = function (_React$Component) {
 				{ className: 'container' },
 				_react2.default.createElement(
 					'section',
-					{ className: 'site-hero' },
+					{ className: 'site-hero homepage', ref: function ref(_ref) {
+							return _this5.homepageSearch = _ref;
+						} },
 					_react2.default.createElement(
 						'nav',
 						null,
@@ -54604,7 +54822,86 @@ var HappyHour = function (_React$Component) {
 				),
 				_react2.default.createElement(
 					'section',
-					{ className: 'body' },
+					{ className: 'header-content searched hide', ref: function ref(_ref2) {
+							return _this5.searchedTopNav = _ref2;
+						} },
+					_react2.default.createElement(
+						'div',
+						{ className: 'wrapper' },
+						_react2.default.createElement(
+							'form',
+							{ onChange: this.handleChange, onSubmit: this.submitFormTopNav, className: 'form' },
+							_react2.default.createElement(
+								'div',
+								{ className: 'inputs' },
+								_react2.default.createElement(
+									'div',
+									{ className: 'cityInput' },
+									_react2.default.createElement(
+										'label',
+										{ htmlFor: 'Downtown' },
+										'Downtown'
+									),
+									_react2.default.createElement('input', { type: 'radio', name: 'location', id: 'Downtown', value: '49.28145,-123.121' })
+								),
+								_react2.default.createElement(
+									'div',
+									{ className: 'cityInput' },
+									_react2.default.createElement(
+										'label',
+										{ htmlFor: 'Kits' },
+										'Kits'
+									),
+									_react2.default.createElement('input', { type: 'radio', name: 'location', id: 'Kits', value: '49.2726,-123.159' })
+								),
+								_react2.default.createElement(
+									'div',
+									{ className: 'cityInput' },
+									_react2.default.createElement(
+										'label',
+										{ htmlFor: 'Main' },
+										'Main St'
+									),
+									_react2.default.createElement('input', { type: 'radio', name: 'location', id: 'Main', value: '49.260035, -123.101093' })
+								),
+								_react2.default.createElement(
+									'div',
+									{ className: 'cityInput' },
+									_react2.default.createElement(
+										'label',
+										{ htmlFor: 'Gastown' },
+										'Gastown'
+									),
+									_react2.default.createElement('input', { type: 'radio', name: 'location', id: 'Gastown', value: '49.282714, -123.106157' })
+								)
+							),
+							_react2.default.createElement(
+								'button',
+								{ type: 'submit', id: 'formSubmit' },
+								_react2.default.createElement('i', { className: 'fa fa-search', 'aria-hidden': 'true' })
+							)
+						),
+						_react2.default.createElement(
+							'div',
+							{ className: 'top-right-nav' },
+							_react2.default.createElement(
+								'a',
+								{ href: '#' },
+								'Home'
+							),
+							_react2.default.createElement(
+								'button',
+								{ onClick: this.viewFavs },
+								'Favourites'
+							)
+						)
+					)
+				),
+				_react2.default.createElement(
+					'section',
+					{ className: 'body homepageSearchResults', ref: function ref(_ref9) {
+							return _this5.homepageSearchResults = _ref9;
+						} },
 					_react2.default.createElement(_Map2.default, { bars: this.state.barsArray }),
 					_react2.default.createElement(
 						'div',
@@ -54615,43 +54912,43 @@ var HappyHour = function (_React$Component) {
 							_react2.default.createElement('input', { onChange: this.handleChange, type: 'text', name: 'filterText', placeholder: 'search...' }),
 							_react2.default.createElement(
 								'button',
-								{ className: 'orderclose', onClick: this.order, ref: function ref(_ref) {
-										return _this3.sortButton = _ref;
+								{ className: 'orderclose', onClick: this.order, ref: function ref(_ref3) {
+										return _this5.sortButton = _ref3;
 									} },
 								'Sorted: Longest'
 							),
 							_react2.default.createElement(
 								'button',
-								{ className: 'orderlong hide', onClick: this.order, ref: function ref(_ref2) {
-										return _this3.sortButton1 = _ref2;
+								{ className: 'orderlong hide', onClick: this.order, ref: function ref(_ref4) {
+										return _this5.sortButton1 = _ref4;
 									} },
 								'Sorted: Closest'
 							),
 							_react2.default.createElement(
 								'button',
-								{ onClick: this.alphabetical, ref: function ref(_ref3) {
-										return _this3.alphabetical1 = _ref3;
+								{ onClick: this.alphabetical, ref: function ref(_ref5) {
+										return _this5.alphabetical1 = _ref5;
 									} },
 								'Alphabetically: A-Z'
 							),
 							_react2.default.createElement(
 								'button',
-								{ className: 'hide', onClick: this.alphabetical, ref: function ref(_ref4) {
-										return _this3.alphabetical2 = _ref4;
+								{ className: 'hide', onClick: this.alphabetical, ref: function ref(_ref6) {
+										return _this5.alphabetical2 = _ref6;
 									} },
 								'Alphabetically: Z-A'
 							),
 							_react2.default.createElement(
 								'button',
-								{ onClick: this.ratingSort, ref: function ref(_ref5) {
-										return _this3.ratingSort1 = _ref5;
+								{ onClick: this.ratingSort, ref: function ref(_ref7) {
+										return _this5.ratingSort1 = _ref7;
 									} },
 								'Sorted: Highest to Lowest'
 							),
 							_react2.default.createElement(
 								'button',
-								{ onClick: this.ratingSort, className: 'hide', ref: function ref(_ref6) {
-										return _this3.ratingSort2 = _ref6;
+								{ onClick: this.ratingSort, className: 'hide', ref: function ref(_ref8) {
+										return _this5.ratingSort2 = _ref8;
 									} },
 								'Sorted: Lowest to Highest'
 							)
@@ -54666,7 +54963,18 @@ var HappyHour = function (_React$Component) {
 							barList
 						)
 					)
-				)
+				),
+				_react2.default.createElement(_BarPage2.default, {
+					bar: this.state.selectedBar,
+					barPhotos: this.state.selectedBarPhotos,
+					backBarToHome: this.backBarToHome,
+					addToFavs: this.addToFavs,
+					className: 'barPageResult hide',
+					ref: function ref(_ref10) {
+						return _this5.barPageResult = _ref10;
+					}
+				}),
+				favsBarList
 			);
 		}
 	}]);
@@ -54676,7 +54984,7 @@ var HappyHour = function (_React$Component) {
 
 exports.default = HappyHour;
 
-},{"./Map.js":262,"jquery":45,"lodash":46,"react":257,"react-dom":59,"react-router":225}],262:[function(require,module,exports){
+},{"./BarPage.js":261,"./Map.js":263,"jquery":45,"lodash":46,"react":257,"react-dom":59,"react-router":225}],263:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -54709,21 +55017,6 @@ function _possibleConstructorReturn(self, call) { if (!self) { throw new Referen
 
 function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
 
-// import { Router, Route, browserHistory, Link } from 'react-router';
-// import { withGoogleMap, GoogleMap, Marker } from "react-google-maps";
-
-// import _ from "lodash";
-// import Helmet from "react-helmet";
-// import GoogleMap from "react-google-map"
-// import GoogleMapLoader from "react-google-maps-loader"
-
-// const apiKey = 'AIzaSyBVzn1qT7LjhZ5m_frrbDT1lNZhNCsN0Jw'
-
-// const coords = {
-//   lat: 51.5258541,
-//   lng: -0.08040660000006028
-// };
-
 var params = { v: '3.exp', key: 'AIzaSyBVzn1qT7LjhZ5m_frrbDT1lNZhNCsN0Jw' };
 
 var Map = function (_React$Component) {
@@ -54755,7 +55048,7 @@ var Map = function (_React$Component) {
   }, {
     key: 'click2',
     value: function click2(id) {
-      console.log('click worked');
+      console.log('click worked', id);
     }
   }, {
     key: 'onMapCreated',
@@ -54793,7 +55086,7 @@ var Map = function (_React$Component) {
           return _react2.default.createElement(_reactGmaps.Marker, {
             lat: coord.venue.location.lat,
             lng: coord.venue.location.lng,
-            draggable: true,
+            draggable: false,
             onClick: function onClick() {
               return _this2.click2(coord.venue.id);
             },
@@ -54811,6 +55104,7 @@ var Map = function (_React$Component) {
             height: '100%',
             lat: 49.283468,
             lng: -123.119705,
+            draggable: false,
             zoom: 15,
             loadingMessage: 'Be happy',
             params: params,
@@ -55005,7 +55299,7 @@ exports.default = Map;
 //   }
 // }
 
-},{"./HappyHour.js":261,"jquery":45,"react":257,"react-dom":59,"react-gmaps":195}],263:[function(require,module,exports){
+},{"./HappyHour.js":262,"jquery":45,"react":257,"react-dom":59,"react-gmaps":195}],264:[function(require,module,exports){
 'use strict';
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
@@ -55064,10 +55358,9 @@ _reactDom2.default.render(_react2.default.createElement(
 	{ history: _reactRouter.browserHistory },
 	_react2.default.createElement(
 		_reactRouter.Route,
-		{ path: '/', component: App },
-		_react2.default.createElement(_reactRouter.Route, { path: '/venues', component: _HappyHour2.default }),
-		_react2.default.createElement(_reactRouter.Route, { path: '/venues/:venue_id', component: _BarDetails2.default })
+		{ path: '/', component: _HappyHour2.default },
+		_react2.default.createElement(_reactRouter.Route, { path: '/aboutus', component: _HappyHour2.default })
 	)
 ), document.getElementById('app'));
 
-},{"./BarDetails.js":260,"./HappyHour.js":261,"react":257,"react-dom":59,"react-router":225}]},{},[263]);
+},{"./BarDetails.js":260,"./HappyHour.js":262,"react":257,"react-dom":59,"react-router":225}]},{},[264]);

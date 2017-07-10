@@ -3,20 +3,7 @@ import ReactDOM from 'react-dom';
 import {Gmaps, Marker, InfoWindow, Circle} from 'react-gmaps';
 import HappyHour from './HappyHour.js';
 import { ajax } from 'jquery';
-// import { Router, Route, browserHistory, Link } from 'react-router';
-// import { withGoogleMap, GoogleMap, Marker } from "react-google-maps";
 
-// import _ from "lodash";
-// import Helmet from "react-helmet";
-// import GoogleMap from "react-google-map"
-// import GoogleMapLoader from "react-google-maps-loader"
-
-// const apiKey = 'AIzaSyBVzn1qT7LjhZ5m_frrbDT1lNZhNCsN0Jw'
-
-// const coords = {
-//   lat: 51.5258541,
-//   lng: -0.08040660000006028
-// };
 
 const params = {v: '3.exp', key: 'AIzaSyBVzn1qT7LjhZ5m_frrbDT1lNZhNCsN0Jw'};
 
@@ -38,7 +25,7 @@ export default class Map extends React.Component {
     console.log('constructor', this.state.activeBarID)
   }
   click2(id) {
-    console.log('click worked')
+    console.log('click worked', id)
   }
 
   onMapCreated(map) {
@@ -71,7 +58,7 @@ export default class Map extends React.Component {
             <Marker
               lat={coord.venue.location.lat}
               lng={coord.venue.location.lng}
-              draggable={true}
+              draggable={false}
               onClick={() => this.click2(coord.venue.id)}
               onDragEnd={this.onDragEnd} />
           )
@@ -86,6 +73,7 @@ export default class Map extends React.Component {
           height={'100%'}
           lat={49.283468}
           lng={-123.119705}
+          draggable={false}
           zoom={15}
           loadingMessage={'Be happy'}
           params={params}

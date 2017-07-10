@@ -169,7 +169,7 @@ nav {
 
 .site-hero {
   height: 80vh;
-  width: 100vw;
+  width: 100%;
   background: linear-gradient(rgba(44, 44, 44, 0.7), rgba(44, 44, 44, 0.7)), url("../../images/hero1.jpg");
   background-size: cover;
   background-position: center; }
@@ -211,6 +211,26 @@ nav {
     display: flex;
     flex-direction: column; }
 
+.header-content.searched {
+  background: green; }
+  .header-content.searched .wrapper {
+    height: 60px;
+    flex-direction: row;
+    justify-content: space-between; }
+  .header-content.searched .form {
+    height: 50px;
+    margin-top: 0;
+    width: 500px;
+    display: flex;
+    align-items: center; }
+    .header-content.searched .form .inputs {
+      height: unset; }
+  .header-content.searched #formSubmit {
+    width: 50px; }
+    .header-content.searched #formSubmit .fa {
+      font-size: 20px;
+      color: white; }
+
 #formSubmit {
   position: absolute;
   right: 0;
@@ -246,11 +266,13 @@ nav {
     flex-wrap: wrap; }
 
 .tile {
-  width: calc(25% - 60px);
+  width: 250px;
+  height: 300px;
   margin: 20px 30px;
   display: flex;
   flex-direction: column;
-  transition: 0.4s; }
+  transition: 0.4s;
+  position: relative; }
   .tile .barInfo {
     display: flex;
     flex-direction: column;
@@ -278,6 +300,14 @@ nav {
         padding: 8px 15px;
         color: white;
         font-weight: 300; }
+
+.tile-overlay {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: rgba(22, 22, 22, 0.6); }
 
 .tile:hover {
   transform: scale(1.05); }

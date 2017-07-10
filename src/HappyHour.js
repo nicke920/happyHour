@@ -2,9 +2,9 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 import { ajax } from 'jquery';
 import Map from './Map.js';
+import BarPage from './BarPage.js';
 import { concat, sortBy, map, sample } from 'lodash'
 import { Router, Route, browserHistory, Link } from 'react-router';
-
 
 
 export default class HappyHour extends React.Component {
@@ -16,13 +16,25 @@ export default class HappyHour extends React.Component {
 			sorted: false,
 			alphabetical: false,
 			ratingSort: false,
-			filterText: ''
+			filterText: '',
+			location: '',
+			barPageOpen: false,
+			favsPageOpen: false,
+			selectedBar: {},
+			selectedBarID: '',
+			selectedBarPhotos: [],
+			userFavsArray: []
 		}
 		this.handleChange = this.handleChange.bind(this);
 		this.submitForm = this.submitForm.bind(this);
+		this.submitFormTopNav = this.submitFormTopNav.bind(this);
 		this.order = this.order.bind(this);
 		this.alphabetical= this.alphabetical.bind(this);
 		this.ratingSort = this.ratingSort.bind(this);
+		this.selectBar = this.selectBar.bind(this);
+		this.backBarToHome = this.backBarToHome.bind(this);
+		this.addToFavs = this.addToFavs.bind(this);
+		this.viewFavs = this.viewFavs.bind(this);
 	}
 	order() {
 		if (this.state.sorted === false) {
@@ -170,51 +182,135 @@ export default class HappyHour extends React.Component {
 		.then((result) => {
 			const barsData = result.response.groups[0].items;
 			this.setState({
-				barsArray: barsData
+				barsArray: barsData,
+				location: ''
 			}) 
-			console.log('new', this.state.barsArray);
+		})
+		this.homepageSearch.classList.toggle('hide');
+		this.searchedTopNav.classList.toggle('hide');
+	}
+	submitFormTopNav(e) {	
+		e.preventDefault();
+		const barArea = this.state.location;
+		// console.log(this.state.location)
+		ajax({
+			url: "https://api.foursquare.com/v2/venues/explore",
+			dataType: 'json',
+			data: {
+				ll: barArea,
+				radius: 500,
+				client_id: '3BUKQ0PLD3SPNW4KRDRH05W3PHE3M23EA1YSOBKJEQUQG4C0',
+				client_secret: 'QTAIFHU51DLAHY4U3VLUAA5CVIVGNLPJOJVSOCCYMGOEWP4T',
+				v: "20170304",
+				section: 'drinks, specials',
+				limit: 10000, 
+				price: '1,2,3,4',
+				venuePhotos: 1,
+				time: 'any',
+				day: 'any'
+		
+			}
+		})
+		.then((result) => {
+			const barsData = result.response.groups[0].items;
+			this.setState({
+				barsArray: barsData,
+				location: ''
+			}) 
 		})
 	}
-	render() {
-		const locationCenter = {
-			lat: '49.260035',
-			lng: '-123.101093'
+	selectBar(bar) {
+		ajax({
+			  url: `https://api.foursquare.com/v2/venues/${bar.venue.id}/photos`,
+			  dataType: 'json',
+			  data: {
+			    oauth_token: 'CZFPQNSPUHEXWCREUHVGTO2KYUBZKS5KE2ZPVW0QQBS4HCFR',
+			    v: '20170617',
+			    limit: 200
+			  }
+			})
+		.then((result) => {
+			console.log('new', result);
+			this.setState({
+				selectedBar: bar.venue,
+				selectedBarID: bar.venue.id,
+				selectedBarPhotos: result.response.photos.items,
+				barPageOpen: true
+			})
+		})
+		if (this.homepageSearchResults !== null) {
+			this.homepageSearchResults.classList.add('hide')
 		}
-
-		let barList = [];
-
+		if (this.barPageResult !== null) {
+			this.barPageResult.classList.remove('hide')
+		}
+	}
+	backBarToHome() {
+		if (this.homepageSearchResults !== null) {
+			this.homepageSearchResults.classList.remove('hide')
+		}
+		if (this.barPageResult !== null) {
+			this.barPageResult.classList.add('hide')
+		}
 		
+		this.setState({
+			selectedBar: '',
+			selectedBarID: '',
+			selectedBarPhotos: [],
+			barPageOpen: false
+		})
+	}
+	addToFavs() {
+		const userFavs = this.state.userFavsArray;
+		userFavs.push(this.state.selectedBar);
+		this.setState({
+			userFavsArray: userFavs
+		})
+	}
+	viewFavs() {
+		this.setState({
+			favsPageOpen: true
+		})
+		if (this.homepageSearchResults !== null) {
+			this.homepageSearchResults.classList.add('hide')
+		}
+		if (this.barPageResult !== null) {
+			this.barPageResult.classList.add('hide')
+		}
+	}
+
+	render() {
+		let barList = [];
+		//once results come back, user can enter filter text to go through the bars
 			if (this.state.filterText.length === 0) {
 				barList = this.state.barsArray
 					.map((bar, i) => {
-					return (<div className="tile single"> 
-								<div className="barPhoto">
-									<img src={`${bar.venue.featuredPhotos.items[0].prefix}600x600${bar.venue.featuredPhotos.items[0].suffix}`}/>
-									<div className="side">
-										<div>
-											<p className='barRating'>{bar.venue.rating}</p>
+						if (bar.venue.featuredPhotos !== undefined) {
+							return (
+								<div className="tile single"> 
+										<div className="barPhoto">
+											<img src={`${bar.venue.featuredPhotos.items[0].prefix}600x600${bar.venue.featuredPhotos.items[0].suffix}`}/>
+											<div className="side">
+												<div>
+													<p className='barRating'>{bar.venue.rating}</p>
+												</div>
+												<div>
+													<img src="../images/icons/wallet.png" alt=""/>
+													<p>{bar.venue.price.currency}</p>
+												</div>
+												<div>
+													<img src="../images/icons/walk.png" alt=""/>
+													<p className='distanceValue'>{`${(bar.venue.location.distance / 100).toFixed(1)}km`}</p>
+												</div>
+											</div>
 										</div>
-										<div>
-											<img src="../images/icons/wallet.png" alt=""/>
-											<p>{bar.venue.price.currency}</p>
-										</div>
-										<div>
-											<img src="../images/icons/walk.png" alt=""/>
-											<p className='distanceValue'>{`${(bar.venue.location.distance / 100).toFixed(1)}km`}</p>
+										<div className="barInfo">
+												<h5>{bar.venue.name}</h5>
+												<button onClick={() => this.selectBar(bar)}>Select</button>
 										</div>
 									</div>
-								</div>
-								<div className="barInfo">
-										<h5>{bar.venue.name}</h5>
-									<div className="main">
-										<p>{bar.venue.location.address}</p>
-									</div>
-									<div className="secondary">
-										<Link to={`/venues/${bar.venue.id}`}>Click dawg</Link>
-									</div>
-								</div>
-							</div>
-					)
+							)
+						}
 				})
 			} else {
 				barList = this.state.barsArray
@@ -222,26 +318,47 @@ export default class HappyHour extends React.Component {
 						return bar.venue.name.toLowerCase().indexOf(this.state.filterText.toLowerCase()) >= 0
 					})
 					.map((bar, i) => {
-					return (<div className="tile single"> 
-								<div className="barPhoto">
-									<img src={`${bar.venue.featuredPhotos.items[0].prefix}600x600${bar.venue.featuredPhotos.items[0].suffix}`}/>
-								</div>
-								<div className="barInfo">
-									<h3>{bar.venue.name}</h3>
-									<p>{bar.venue.rating}</p>
-									<p>{bar.venue.location.address}</p>
-									<p>{`${bar.venue.location.distance}m`}</p>
-									<p>{`${bar.venue.location.city}, ${bar.venue.location.state}`}</p>
-									<Link to={`/venues/${bar.venue.id}`}>Click dawg</Link>
-								</div>
-							</div>
-					)
+						if (bar.venue.featuredPhotos !== undefined) {
+							return (
+								<div className="tile single"> 
+										<div className="barPhoto">
+											<img src={`${bar.venue.featuredPhotos.items[0].prefix}600x600${bar.venue.featuredPhotos.items[0].suffix}`}/>
+											<div className="side">
+												<div>
+													<p className='barRating'>{bar.venue.rating}</p>
+												</div>
+												<div>
+													<img src="../images/icons/wallet.png" alt=""/>
+													<p>{bar.venue.price.currency}</p>
+												</div>
+												<div>
+													<img src="../images/icons/walk.png" alt=""/>
+													<p className='distanceValue'>{`${(bar.venue.location.distance / 100).toFixed(1)}km`}</p>
+												</div>
+											</div>
+										</div>
+										<div className="barInfo">
+												<h5>{bar.venue.name}</h5>
+												<button onClick={() => this.selectBar(bar)}>Select</button>
+										</div>
+									</div>
+							)
+						}
 				})
 			}
 
+		let favsBarList = [];
+		if (this.state.favsPageOpen === true && this.state.userFavsArray.length > 0) {
+			console.log('999', this.state.barsArray.map((bar) => {
+				bar.name
+			}))
+		}
+		
+
+
 		return (
 			<div className="container">
-				<section className="site-hero">
+				<section className="site-hero homepage"  ref={ref => this.homepageSearch = ref}>
 						<nav>
 							<div className="wrapper">
 								<div className="logo">
@@ -255,6 +372,8 @@ export default class HappyHour extends React.Component {
 								</ul>
 							</div>
 						</nav>
+
+
 						<div className="header-content">
 							<div className="wrapper">
 								<h1>Find Your Happy Hour</h1>
@@ -287,9 +406,42 @@ export default class HappyHour extends React.Component {
 							</div>
 						</div>
 				</section>
+				<section className="header-content searched hide" ref={ref => this.searchedTopNav = ref}>
+					<div className="wrapper">
+						<form onChange={this.handleChange} onSubmit={this.submitFormTopNav} className="form">
+								<div className="inputs">
+									<div className='cityInput'>
+										<label htmlFor="Downtown">Downtown</label>
+										<input type="radio" name="location" id="Downtown" value="49.28145,-123.121" />
+									</div>
+									<div className='cityInput'>
+										<label htmlFor="Kits">Kits</label>
+										<input type="radio" name="location" id="Kits" value="49.2726,-123.159" />
+									</div>
+
+									<div className='cityInput'>
+										<label htmlFor="Main">Main St</label>
+										<input type="radio" name="location" id="Main" value="49.260035, -123.101093" />
+									</div>
+
+									<div className='cityInput'>
+										<label htmlFor="Gastown">Gastown</label>
+										<input type="radio" name="location" id="Gastown" value="49.282714, -123.106157" />
+									</div>
+								</div>
+							<button type='submit' id='formSubmit'>
+								<i className="fa fa-search" aria-hidden="true"></i>
+							</button>
+						</form>
+						<div className='top-right-nav'>
+							<a href="#">Home</a>
+							<button onClick={this.viewFavs}>Favourites</button>
+						</div>
+					</div>
+				</section>
 				
-				<section className="body">
-				<Map bars={this.state.barsArray}/>
+				<section className="body homepageSearchResults" ref={ref => this.homepageSearchResults = ref}>
+					<Map bars={this.state.barsArray}/>
 					<div className="filters">
 						<div className="wrapper">
 							<input onChange={this.handleChange} type="text" name="filterText" placeholder='search...'/>
@@ -313,6 +465,15 @@ export default class HappyHour extends React.Component {
 					</section>
 					
 				</section>
+				<BarPage 
+					bar={this.state.selectedBar} 
+					barPhotos={this.state.selectedBarPhotos} 
+					backBarToHome={this.backBarToHome} 
+					addToFavs = {this.addToFavs}
+					className="barPageResult hide" 
+					ref={ref => this.barPageResult = ref}
+				/>
+				{favsBarList}
 			</div>
 			)
 	}

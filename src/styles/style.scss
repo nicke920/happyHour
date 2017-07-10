@@ -15,6 +15,7 @@ img {
 	margin: 0 auto;
 }
 
+
 nav {
 	background: rgba(255,255,255,0.9);
 	.wrapper {
@@ -37,7 +38,7 @@ nav {
 
 .site-hero {
 	height: 80vh;
-	width: 100vw;
+	width: 100%;
 	background: linear-gradient(rgba(44,44,44,0.7), rgba(44,44,44,0.7)), url('../../images/hero1.jpg');
 	background-size: cover;
 	background-position: center;
@@ -59,6 +60,8 @@ nav {
 		color: #e8e8e8;
 	}
 }
+
+
 
 .form {
 	width: 60%;
@@ -84,6 +87,33 @@ nav {
 	.cityInput {
 		display: flex;
 		flex-direction: column;
+	}
+}
+
+.header-content.searched {
+	background: green;
+
+	.wrapper {
+		height: 60px;
+		flex-direction: row;
+		justify-content: space-between;
+	}
+	.form {
+		height: 50px;
+		margin-top: 0;
+		width: 500px;
+		display: flex;
+		align-items: center;
+		.inputs {
+			height: unset;
+		}
+	}
+	#formSubmit {
+		width: 50px;
+		.fa {
+			font-size: 20px;
+			color: white;
+		}
 	}
 }
 
@@ -125,7 +155,6 @@ nav {
 
 .results {
 	padding: 30px 0;
-
 	.wrapper {
 		width: 1400px;
 		display: flex;
@@ -137,11 +166,13 @@ nav {
 
 
 .tile {
-	width: calc(25% - 60px);
+	width: 250px;
+	height: 300px;
 	margin: 20px 30px;
 	display: flex;
 	flex-direction: column;
 	transition: 0.4s;
+	position: relative;
 	.barInfo {
 		display: flex;
 		flex-direction: column;
@@ -176,6 +207,16 @@ nav {
 			}
 		}
 	}
+}
+.tile-overlay {
+	// display: none;
+	position: absolute;
+	top: 0;
+	bottom: 0;
+	left: 0;
+	right: 0;
+	background: rgba(22,22,22,.6);
+
 }
 .tile:hover {
 	transform: scale(1.05);

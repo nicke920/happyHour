@@ -15,8 +15,7 @@ class App extends React.Component {
 }
 
 ReactDOM.render(<Router history={browserHistory}>
-		<Route path="/" component={App}>
-			<Route path="/venues" component={HappyHour}/>
-			<Route path="/venues/:venue_id" component={BarDetails} />
+		<Route path="/" component={HappyHour}>
+			<Route path="/aboutus" component={HappyHour}/>
 		</Route>
 	</Router>, document.getElementById('app'))
